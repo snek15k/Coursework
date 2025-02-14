@@ -37,7 +37,7 @@ def get_transfers_and_cash(df: pd.DataFrame) -> list:
 def get_currency_rates() -> list:
     """Получаем курсы валют через API."""
     # Пример API для получения курсов валют
-    response = requests.get('https://api.exchangerate-api.com/v4/latest/RUB')
+    response = requests.get("EXCHANGE_RATE_API_KEY")
     data = json.loads(response.text)  # Применяем json для обработки ответа
 
     return [{"currency": currency, "rate": data['rates'][currency]} for currency in ['USD', 'EUR']]
@@ -46,11 +46,11 @@ def get_currency_rates() -> list:
 def get_stock_prices() -> list:
     """Получаем стоимость акций через API."""
     # Пример API для получения стоимости акций
-    stock_symbols = ['AAPL', 'AMZN', 'GOOGL', 'MSFT', 'TSLA']
+    stock_symbols = ["ALPHA_VANTAGE_API_KEY"]
     stock_prices = []
 
     for symbol in stock_symbols:
-        response = requests.get(f'https://api.example.com/stocks/{symbol}')
+        response = requests.get(f"ALPHA_VANTAGE_API_KEY{symbol}")
         data = json.loads(response.text)  # Применяем json для обработки ответа
         stock_prices.append({"stock": symbol, "price": data['price']})
 
