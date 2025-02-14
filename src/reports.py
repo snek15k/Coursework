@@ -11,11 +11,6 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 def analyze_cashback_categories(transactions: List[Dict[str, Any]], year: int, month: int) -> str:
     """
     Анализирует категории с повышенным кешбэком за указанный месяц и год.
-
-    :param transactions: Список транзакций в формате словарей.
-    :param year: Год для анализа.
-    :param month: Месяц для анализа.
-    :return: JSON-строка с анализом кэшбэка по категориям.
     """
     cashback_by_category = defaultdict(float)
 
@@ -37,7 +32,6 @@ def analyze_cashback_categories(transactions: List[Dict[str, Any]], year: int, m
 def report_decorator(filename: Optional[str] = None) -> Callable:
     """
     Декоратор для сохранения отчета в файл.
-    :param filename: Имя файла для сохранения отчета. Если None, используется имя по умолчанию.
     """
 
     def decorator(func: Callable) -> Callable:
@@ -58,11 +52,6 @@ def report_decorator(filename: Optional[str] = None) -> Callable:
 def spending_by_category(transactions: pd.DataFrame, category: str, date: Optional[str] = None) -> Dict[str, float]:
     """
     Возвращает траты по заданной категории за последние три месяца от переданной даты.
-
-    :param transactions: DataFrame с транзакциями.
-    :param category: Название категории для анализа.
-    :param date: Опциональная дата отсчета (формат 'YYYY-MM-DD'). Если не передана, берется текущая дата.
-    :return: JSON-объект с тратами по категории за последние три месяца.
     """
     if date is None:
         date = datetime.today().strftime('%Y-%m-%d')

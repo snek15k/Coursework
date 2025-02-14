@@ -10,11 +10,6 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 def analyze_cashback_categories(transactions: List[Dict[str, Any]], year: int, month: int) -> str:
     """
     Анализирует категории с повышенным кешбэком за указанный месяц и год.
-
-    :param transactions: Список транзакций в формате словарей.
-    :param year: Год для анализа.
-    :param month: Месяц для анализа.
-    :return: JSON-строка с анализом кэшбэка по категориям.
     """
     cashback_by_category = defaultdict(float)
 
