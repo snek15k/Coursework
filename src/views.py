@@ -73,3 +73,4 @@ def get_start_date(date: datetime, period: str) -> datetime:
 print(get_start_date(datetime.strptime('2021-11-13 10:00:00', "%Y-%m-%d %H:%M:%S"), "M"))
 print(get_greeting(datetime.strptime('2021-11-13 10:00:00', "%Y-%m-%d %H:%M:%S")))
 print(get_event_data("2023-11-11 00:00:00", "M"))
+
