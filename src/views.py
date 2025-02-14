@@ -1,73 +1,75 @@
 import json
-import pandas as pd
-import logging
 from datetime import datetime, timedelta
-from typing import Optional
-from src.utils import get_category_totals, get_currency_rates, get_stock_prices
-
-# Настройка логирования
-logging.basicConfig(level=logging.INFO)
+from utils import load_user_settings, get_currency_rates, get_stock_prices, load_transactions_from_excel, \
+    filter_transactions_by_date, get_top_transactions
 
 
-def get_event_data(date_str: str, period: Optional[str] = 'M') -> str:
-    """Основная функция для генерации данных о событиях."""
-
-    # Преобразуем строку в datetime
+# Основная функция для страницы "Главная"
+def get_event_data(date_str: str, period: str = 'M') -> str:
+    # Преобразуем строку даты в datetime
     date = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
 
-    # Загружаем данные из Excel
-    df = pd.read_excel('data/operations.xlsx')
-
-    # Фильтрация данных по заданному периоду
-    if period is None:
-        period = 'M'  # Если period не передан, ставим месяц по умолчанию.
-
+    # Получаем начальную дату для анализа
     start_date = get_start_date(date, period)
-    df_filtered = df[df['date'] >= start_date]
 
-    # Получаем данные о расходах и поступлениях
-    expenses = get_category_totals(df_filtered, category_type='expense')
-    income = get_category_totals(df_filtered, category_type='income')
+    # Загружаем настройки пользователя
+    user_settings = load_user_settings()
 
-    # Получаем курсы валют и стоимость акций
-    currency_rates = get_currency_rates()
-    stock_prices = get_stock_prices()
+    # Загружаем данные о транзакциях
+    transactions_df = load_transactions_from_excel(r'C:\Users\artem\PycharmProjects\Coursework\data\operations.xlsx')
 
-    # Формируем данные для ответа в виде словаря
+    # Фильтруем транзакции по дате
+    filtered_transactions = filter_transactions_by_date(transactions_df, start_date, date)
+
+    # Получаем топ-5 транзакций
+    top_transactions = get_top_transactions(filtered_transactions)
+
+    # Получаем курсы валют и цены на акции
+    currencies = user_settings.get("user_currencies", [])
+    stocks = user_settings.get("user_stocks", [])
+    currency_rates = get_currency_rates(currencies)
+    stock_prices = get_stock_prices(stocks)
+
+    # Приветствие
+    greeting = get_greeting(date)
+
+    # Формируем JSON-ответ
     response = {
-        "expenses": {
-            "total_amount": round(expenses['total']),
-            "main": expenses['main'],
-            "transfers_and_cash": expenses['transfers_and_cash'],
-        },
-        "income": {
-            "total_amount": round(income['total']),
-            "main": income['main'],
-        },
+        "greeting": greeting,
+        "top_transactions": top_transactions,
         "currency_rates": currency_rates,
-        "stock_prices": stock_prices,
+        "stock_prices": stock_prices
     }
+    response_json = json.dumps(response, ensure_ascii=False, indent=4)
+    return response_json
 
-    # Возвращаем строку JSON
-    return json.dumps(response, ensure_ascii=False)
 
-
-def get_start_date(date: datetime, period: str) -> datetime:
-    """Возвращает начальную дату для фильтрации в зависимости от периода."""
-    if period == 'W':
-        # Начало недели (понедельник)
-        start_date = date - timedelta(days=date.weekday())
-    elif period == 'M':
-        # Начало месяца
-        start_date = date.replace(day=1)
-    elif period == 'Y':
-        # Начало года
-        start_date = date.replace(month=1, day=1)
-    elif period == 'ALL':
-        # Все данные до указанной даты
-        start_date = datetime.min
+# Функция для получения приветствия в зависимости от времени
+def get_greeting(date: datetime) -> str:
+    hour = date.hour
+    if 6 <= hour < 12:
+        return "Доброе утро"
+    elif 12 <= hour < 18:
+        return "Добрый день"
+    elif 18 <= hour < 22:
+        return "Добрый вечер"
     else:
-        # По умолчанию месяц
-        start_date = date.replace(day=1)
+        return "Доброй ночи"
 
-    return start_date
+
+# Получение начальной даты для анализа
+def get_start_date(date: datetime, period: str) -> datetime:
+    if period == 'M':
+        return date.replace(day=1)
+    elif period == 'W':
+        start_of_week = date - timedelta(days=date.weekday())
+        return start_of_week
+    elif period == 'Y':
+        return date.replace(month=1, day=1)
+    else:
+        return datetime.min
+
+
+print(get_start_date(datetime.strptime('2021-11-13 10:00:00', "%Y-%m-%d %H:%M:%S"), "M"))
+print(get_greeting(datetime.strptime('2021-11-13 10:00:00', "%Y-%m-%d %H:%M:%S")))
+print(get_event_data("2023-11-11 00:00:00", "M"))
