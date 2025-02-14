@@ -69,3 +69,4 @@ if __name__ == "__main__":
     # Анализ кешбэка за май 2020
     result = analyze_cashback_categories_from_excel(file_path, 2020, 5)
     print(result)
+
