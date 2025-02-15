@@ -79,11 +79,11 @@ def analyze_cashback_categories_from_excel(file_path: str, year: int, month: int
 
     return result_json
 
-# # Пример использования функции
-# if __name__ == "__main__":
-#     # Путь к Excel файлу
-#     file_path = (os.path.join(os.path.dirname(__file__), "..", "data", "operations.xlsx"))
-#
-#     # Анализ кешбэка за май 2020
-#     result = analyze_cashback_categories_from_excel(file_path, 2020, 5)
-#     print(result)
+# Пример использования функции
+if __name__ == "__main__":
+    # Путь к Excel файлу
+    file_path = (os.path.join(os.path.dirname(__file__), "..", "data", "operations.xlsx"))
+
+    # Анализ кешбэка за май 2020
+    result = analyze_cashback_categories_from_excel(file_path, 2020, 5)
+    print(result)

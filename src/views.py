@@ -130,8 +130,8 @@ def get_main_page(date: str, transactions_path: str) -> str:
     return json.dumps(response_data, ensure_ascii=False, indent=4)
 
 
-# # Пример вызова функции
-# transactions_path = os.path.join(os.path.dirname(__file__), "..", "data", "operations.xlsx")
-# date = "2025-02-15 10:00:00"
-# result = get_main_page(date, transactions_path)
-# print(result)
+# Пример вызова функции
+transactions_path = os.path.join(os.path.dirname(__file__), "..", "data", "operations.xlsx")
+date = "2025-02-15 10:00:00"
+result = get_main_page(date, transactions_path)
+print(result)

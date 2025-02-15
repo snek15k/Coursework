@@ -1,126 +1,78 @@
-import unittest
-from unittest.mock import patch, MagicMock
-import pandas as pd
-from datetime import datetime
+import pytest
 import json
-import os
-from src.reports import spending_by_category  # Замените на реальный путь
+from unittest.mock import patch, mock_open, call
+from datetime import datetime
+import logging
+from src.reports import log_report_to_file
 
-class TestSpendingByCategory(unittest.TestCase):
 
-    @patch('builtins.open')  # Мокаем open для проверки записи в файл
-    @patch('json.dump')  # Мокаем json.dump для проверки правильности записи
-    def test_spending_by_category_decorator(self, mock_json_dump, mock_open):
-        # Делаем пример транзакций
-        data = {
-            'Дата операции': ['2025-02-01', '2025-02-15', '2025-01-01'],
-            'Категория': ['Супермаркеты', 'Супермаркеты', 'Транспорт'],
-            'Сумма операции': [1000, 500, 200],
-            'Описание': ['Покупка еды', 'Покупка напитков', 'Поездка']
-        }
-        df = pd.DataFrame(data)
+# Пример функции с декоратором
+@log_report_to_file()
+def generate_report():
+    return {"data": "sample report"}
 
-        # Мокаем результат функции
-        mock_json_dump.return_value = None
 
-        # Вызовем функцию
-        result = spending_by_category(transactions=df, category="Супермаркеты", date="2025-02-01")
+# Тест 1: Проверка записи в файл с автоматически сгенерированным именем
+@patch("builtins.open", new_callable=mock_open)
+@patch("logging.info")
+def test_log_report_to_file_default(mock_logging, mock_open_file):
+    # Поскольку имя файла не передано, будет использоваться автоматическое имя
+    now = datetime.now().strftime('%Y%m%d_%H%M%S')
+    expected_filename = f"../data/report_{now}.json"
 
-        # Проверяем, что файл был открыт
-        mock_open.assert_called_once_with("spending_by_category_report.json", 'w', encoding='utf-8')
+    # Вызываем функцию с декоратором
+    result = generate_report()
 
-        # Проверяем, что json.dump был вызван с правильным результатом
-        mock_json_dump.assert_called_once()
+    # Проверяем, что результат возвращается правильно
+    assert result == {"data": "sample report"}
 
-        # Проверяем результат
-        expected_result = {
-            'category': 'Супермаркеты',
-            'total_spending': 1500,
-            'transactions': [
-                {'Дата операции': '2025-02-01 00:00:00', 'Сумма операции': 1000, 'Описание': 'Покупка еды'},
-                {'Дата операции': '2025-02-15 00:00:00', 'Сумма операции': 500, 'Описание': 'Покупка напитков'}
-            ]
-        }
-        # Проверяем, что результат соответствует ожидаемому
-        self.assertEqual(result, expected_result)
+    # Проверяем, что файл был открыт для записи с правильным именем
+    mock_open_file.assert_called_once_with(expected_filename, 'w', encoding='utf-8')
 
-    @patch('pandas.read_excel')  # Мокаем чтение Excel файла
-    def test_spending_by_category_no_transactions(self, mock_read_excel):
-        # Создаем DataFrame с данными
-        data = {
-            'Дата операции': ['2025-01-01', '2025-01-15'],
-            'Категория': ['Транспорт', 'Транспорт'],
-            'Сумма операции': [1000, 500],
-            'Описание': ['Поездка на такси', 'Поездка на автобусе']
-        }
-        df = pd.DataFrame(data)
+    # Ожидаем строку JSON с отступами
+    expected_json = json.dumps(result, ensure_ascii=False, indent=4)
 
-        # Мокаем чтение Excel файла
-        mock_read_excel.return_value = df
+    # Получаем строку, записанную методом write
+    written_data = ''.join(call[0][0] for call in mock_open_file().write.call_args_list)
 
-        # Вызов функции с категорией, по которой нет транзакций
-        result = spending_by_category(transactions=df, category="Супермаркеты", date="2025-02-01")
+    # Проверяем, что записанные данные соответствуют ожидаемой строке JSON
+    assert written_data == expected_json
 
-        # Ожидаемый результат
-        expected_result = {
-            'category': 'Супермаркеты',
-            'total_spending': 0,
-            'transactions': []
-        }
+    # Проверяем, что логирование произошло
+    mock_logging.assert_called_once_with(f"Отчет записан в файл: {expected_filename}")
 
-        # Проверяем, что результат пустой
-        self.assertEqual(result, expected_result)
+# Тест 2: Проверка записи в файл с переданным именем
+@patch("builtins.open", new_callable=mock_open)
+@patch("logging.info")
+def test_log_report_to_file_with_filename(mock_logging, mock_open_file):
+    # Передаем конкретное имя файла
+    filename = "custom_report.json"
 
-    @patch('pandas.read_excel')  # Мокаем чтение Excel файла
-    def test_spending_by_category_no_category(self, mock_read_excel):
-        # Создаем DataFrame с данными
-        data = {
-            'Дата операции': ['2025-01-01', '2025-01-15'],
-            'Категория': ['Транспорт', 'Транспорт'],
-            'Сумма операции': [1000, 500],
-            'Описание': ['Поездка на такси', 'Поездка на автобусе']
-        }
-        df = pd.DataFrame(data)
+    # Подменяем поведение генератора имени файла в декораторе
+    with patch('datetime.datetime') as mock_datetime:
+        mock_datetime.now.return_value = datetime(2025, 2, 15, 19, 35, 32)  # Фиксированная дата и время
+        result = generate_report(filename=filename)  # Передаем имя файла в тестируемую функцию
 
-        # Мокаем чтение Excel файла
-        mock_read_excel.return_value = df
+    # Проверяем, что результат возвращается правильно
+    assert result == {"data": "sample report"}
 
-        # Вызов функции с категорией, которой нет в данных
-        result = spending_by_category(transactions=df, category="Еда", date="2025-02-01")
+    # Проверяем, что файл был открыт с переданным именем
+    mock_open_file.assert_called_once_with(filename, 'w', encoding='utf-8')
 
-        # Ожидаемый результат (пустой)
-        expected_result = {
-            'category': 'Еда',
-            'total_spending': 0,
-            'transactions': []
-        }
+    # Проверяем, что данные записаны в файл
+    expected_json = json.dumps(result, ensure_ascii=False, indent=4)
 
-        # Проверяем, что результат пустой
-        self.assertEqual(result, expected_result)
+    # Ожидаем несколько вызовов write, так как json.dump записывает данные частями
+    write_calls = [
+        call('{'),
+        call('\n    '),
+        call('"data"'),
+        call(': '),
+        call('"sample report"'),
+        call('\n'),
+        call('}')
+    ]
+    mock_open_file().write.assert_has_calls(write_calls)
 
-    @patch('pandas.read_excel')  # Мокаем чтение Excel файла
-    def test_spending_by_category_invalid_date_format(self, mock_read_excel):
-        # Создаем DataFrame с данными
-        data = {
-            'Дата операции': ['2025-01-01', '2025-01-15'],
-            'Категория': ['Транспорт', 'Транспорт'],
-            'Сумма операции': [1000, 500],
-            'Описание': ['Поездка на такси', 'Поездка на автобусе']
-        }
-        df = pd.DataFrame(data)
-
-        # Мокаем чтение Excel файла
-        mock_read_excel.return_value = df
-
-        # Вызов функции с некорректной датой
-        result = spending_by_category(transactions=df, category="Транспорт", date="invalid-date")
-
-        # Ожидаемое поведение: дата невалидна, она не должна попасть в фильтрацию
-        expected_result = {
-            'category': 'Транспорт',
-            'total_spending': 0,
-            'transactions': []
-        }
-
-        # Проверяем, что результат пустой
-        self.assertEqual(result, expected_result)
+    # Проверяем, что логирование произошло с правильным сообщением
+    mock_logging.assert_called_once_with(f"Отчет записан в файл: {filename}")

@@ -43,7 +43,7 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
     date = datetime.strptime(date, "%Y-%m-%d")
 
     # Убедимся, что столбец 'Дата операции' преобразован в тип datetime
-    transactions['Дата операции'] = pd.to_datetime(transactions['Дата операции'], errors='coerce')
+    transactions['Дата операции'] = pd.to_datetime(transactions['Дата операции'], dayfirst=True, errors='coerce')
 
     # Вычисляем дату 3 месяца назад
     start_date = date - timedelta(days=90)
@@ -57,8 +57,11 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
     # Возвращаем сумму трат по категории
     total_spending = filtered_transactions['Сумма операции'].sum()
 
-    # Преобразуем столбец 'Дата операции' в строку для JSON сериализации
-    filtered_transactions['Дата операции'] = filtered_transactions['Дата операции'].dt.strftime('%Y-%m-%d %H:%M:%S')
+    # Создаём копию отфильтрованных данных
+    filtered_transactions = filtered_transactions.copy()
+
+    # Преобразуем 'Дата операции' в строку для JSON
+    filtered_transactions['Дата операции'] = filtered_transactions['Дата операции'].astype(str)
 
     return {
         'category': category,
