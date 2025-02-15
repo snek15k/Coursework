@@ -1,8 +1,7 @@
-import pytest
 import json
-from unittest.mock import patch, mock_open, call
 from datetime import datetime
-import logging
+from unittest.mock import call, mock_open, patch
+
 from src.reports import log_report_to_file
 
 
@@ -41,6 +40,7 @@ def test_log_report_to_file_default(mock_logging, mock_open_file):
     # Проверяем, что логирование произошло
     mock_logging.assert_called_once_with(f"Отчет записан в файл: {expected_filename}")
 
+
 # Тест 2: Проверка записи в файл с переданным именем
 @patch("builtins.open", new_callable=mock_open)
 @patch("logging.info")
@@ -60,7 +60,7 @@ def test_log_report_to_file_with_filename(mock_logging, mock_open_file):
     mock_open_file.assert_called_once_with(filename, 'w', encoding='utf-8')
 
     # Проверяем, что данные записаны в файл
-    expected_json = json.dumps(result, ensure_ascii=False, indent=4)
+    # expected_json = json.dumps(result, ensure_ascii=False, indent=4)
 
     # Ожидаем несколько вызовов write, так как json.dump записывает данные частями
     write_calls = [

@@ -1,10 +1,10 @@
-import os
-import pandas as pd
 import json
 import logging
-from functools import wraps
 from datetime import datetime, timedelta
+from functools import wraps
 from typing import Optional
+
+import pandas as pd
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -66,14 +66,16 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
     return {
         'category': category,
         'total_spending': total_spending,
-        'transactions': filtered_transactions[['Дата операции', 'Сумма операции', 'Описание']].to_dict(orient='records')
+        'transactions': filtered_transactions[
+            ['Дата операции', 'Сумма операции', 'Описание']
+        ].to_dict(orient='records')
     }
 
 # Пример использования
-if __name__ == "__main__":
-    # Загружаем данные из Excel файла
-    df = pd.read_excel(os.path.join(os.path.dirname(__file__), "..", "data", "operations.xlsx"))
-
-    # Пример вызова функции с категорией и датой
-    result = spending_by_category(transactions=df, category="Супермаркеты", date="2020-05-20")
-    print(result)
+# if __name__ == "__main__":
+#     # Загружаем данные из Excel файла
+#     df = pd.read_excel(os.path.join(os.path.dirname(__file__), "..", "data", "operations.xlsx"))
+#
+#     # Пример вызова функции с категорией и датой
+#     result = spending_by_category(transactions=df, category="Супермаркеты", date="2020-05-20")
+#     print(result)

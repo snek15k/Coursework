@@ -1,6 +1,6 @@
-import re
 import logging
-from typing import List, Dict
+import re
+from typing import Dict, List
 
 # Конфигурируем логгер
 logging.basicConfig(level=logging.INFO)

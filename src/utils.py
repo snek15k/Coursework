@@ -1,10 +1,10 @@
-from datetime import datetime
+import json
 import os
+from datetime import datetime
+
 import pandas as pd
 import requests
 from dotenv import load_dotenv
-from typing import List, Dict
-import json
 
 
 def greet() -> str:
@@ -51,13 +51,13 @@ def get_cards(transactions: dict) -> list[dict]:
     for sheet_name, df in transactions.items():
         print(f"Обрабатываем лист: {sheet_name}")
 
-        # Проверим первые несколько строк для диагностики
-        print(df.head())  # Выводим первые несколько строк данных
+        # # Проверим первые несколько строк для диагностики
+        # print(df.head())  # Выводим первые несколько строк данных
 
         for _, row in df.iterrows():
             card_number = row['Номер карты']
-            # Проверка: выводим все данные транзакции
-            print(f"Транзакция: {row.to_dict()}")
+            # # Проверка: выводим все данные транзакции
+            # print(f"Транзакция: {row.to_dict()}")
 
             if row['Статус'] == 'ОК' and row['Сумма операции'] > 0:
                 # Извлекаем последние 4 цифры карты
@@ -158,7 +158,7 @@ def get_currency_rates(path_to_user_settings_json: str) -> list[dict]:
     if not user_currencies:
         raise ValueError("Список валют в файле настроек не найден или пуст.")
 
-    # Формируем URL для запроса (например, API Open Exchange Rates)
+    # Формируем URL для запроса
     url = "https://open.er-api.com/v6/latest/USD"  # Используем USD как базовую валюту
 
     # Отправляем запрос
