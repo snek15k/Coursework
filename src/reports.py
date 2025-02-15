@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import json
 import logging
@@ -15,7 +16,6 @@ def log_report_to_file(filename: Optional[str] = None):
         @wraps(func)
         def wrapper(filename=None, *args, **kwargs):
             result = func(*args, **kwargs)
-            print(result)
 
             # Если имя файла не передано, используем текущее время для имени файла
             if filename is None:
@@ -57,7 +57,8 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
     # Возвращаем сумму трат по категории
     total_spending = filtered_transactions['Сумма операции'].sum()
 
-    transactions = transactions.melt(id_vars=['Дата операции'])
+    # Преобразуем столбец 'Дата операции' в строку для JSON сериализации
+    filtered_transactions['Дата операции'] = filtered_transactions['Дата операции'].dt.strftime('%Y-%m-%d %H:%M:%S')
 
     return {
         'category': category,
@@ -65,11 +66,10 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
         'transactions': filtered_transactions[['Дата операции', 'Сумма операции', 'Описание']].to_dict(orient='records')
     }
 
-
 # Пример использования
 if __name__ == "__main__":
     # Загружаем данные из Excel файла
-    df = pd.read_excel(r'C:\Users\artem\PycharmProjects\Coursework\data\operations.xlsx')
+    df = pd.read_excel(os.path.join(os.path.dirname(__file__), "..", "data", "operations.xlsx"))
 
     # Пример вызова функции с категорией и датой
     result = spending_by_category(transactions=df, category="Супермаркеты", date="2020-05-20")
