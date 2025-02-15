@@ -401,6 +401,8 @@ files = [
 ]
 
 [[package]]
+<<<<<<< HEAD
+=======
 name = "openpyxl"
 version = "3.1.5"
 description = "A Python library to read/write Excel 2010 xlsx/xlsm files"
@@ -416,6 +418,7 @@ files = [
 et-xmlfile = "*"
 
 [[package]]
+>>>>>>> feature
 name = "packaging"
 version = "24.2"
 description = "Core utilities for Python packages"
@@ -511,6 +514,8 @@ test = ["hypothesis (>=6.46.1)", "pytest (>=7.3.2)", "pytest-xdist (>=2.2.0)"]
 xml = ["lxml (>=4.9.2)"]
 
 [[package]]
+<<<<<<< HEAD
+=======
 name = "pandas-stubs"
 version = "2.2.3.241126"
 description = "Type annotations for pandas"
@@ -527,6 +532,7 @@ numpy = ">=1.23.5"
 types-pytz = ">=2022.1.1"
 
 [[package]]
+>>>>>>> feature
 name = "pathspec"
 version = "0.12.1"
 description = "Utility library for gitignore style pattern matching of file paths."
@@ -632,6 +638,8 @@ files = [
 six = ">=1.5"
 
 [[package]]
+<<<<<<< HEAD
+=======
 name = "python-dotenv"
 version = "1.0.1"
 description = "Read key-value pairs from a .env file and set them as environment variables"
@@ -647,6 +655,7 @@ files = [
 cli = ["click (>=5.0)"]
 
 [[package]]
+>>>>>>> feature
 name = "pytz"
 version = "2025.1"
 description = "World timezone definitions, modern and historical"
@@ -659,6 +668,8 @@ files = [
 ]
 
 [[package]]
+<<<<<<< HEAD
+=======
 name = "requests"
 version = "2.32.3"
 description = "Python HTTP for Humans."
@@ -681,6 +692,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)"]
 use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
+>>>>>>> feature
 name = "six"
 version = "1.17.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -693,6 +705,8 @@ files = [
 ]
 
 [[package]]
+<<<<<<< HEAD
+=======
 name = "types-pytz"
 version = "2025.1.0.20250204"
 description = "Typing stubs for pytz"
@@ -720,6 +734,7 @@ files = [
 urllib3 = ">=2"
 
 [[package]]
+>>>>>>> feature
 name = "typing-extensions"
 version = "4.12.2"
 description = "Backported and Experimental Type Hints for Python 3.8+"
@@ -743,6 +758,12 @@ files = [
     {file = "tzdata-2025.1.tar.gz", hash = "sha256:24894909e88cdb28bd1636c6887801df64cb485bd593f2fd83ef29075a81d694"},
 ]
 
+<<<<<<< HEAD
+[metadata]
+lock-version = "2.1"
+python-versions = ">=3.13"
+content-hash = "06dbe53c3d2aa4539d99382c41c54f7fcffc18a4eb0e62c8fa49ebb67c5e61fd"
+=======
 [[package]]
 name = "urllib3"
 version = "2.3.0"
@@ -765,3 +786,4 @@ zstd = ["zstandard (>=0.18.0)"]
 lock-version = "2.1"
 python-versions = ">=3.13"
 content-hash = "d515044d40a8bf9dce82cc41ab82ea657d731ad70e69352b11c37737c552ceef"
+>>>>>>> feature
