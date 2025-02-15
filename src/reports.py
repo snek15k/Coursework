@@ -1,9 +1,10 @@
-import pandas as pd
 import json
 import logging
-from functools import wraps
 from datetime import datetime, timedelta
+from functools import wraps
 from typing import Optional
+
+import pandas as pd
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -15,7 +16,6 @@ def log_report_to_file(filename: Optional[str] = None):
         @wraps(func)
         def wrapper(filename=None, *args, **kwargs):
             result = func(*args, **kwargs)
-            print(result)
 
             # Если имя файла не передано, используем текущее время для имени файла
             if filename is None:
@@ -43,7 +43,7 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
     date = datetime.strptime(date, "%Y-%m-%d")
 
     # Убедимся, что столбец 'Дата операции' преобразован в тип datetime
-    transactions['Дата операции'] = pd.to_datetime(transactions['Дата операции'], errors='coerce')
+    transactions['Дата операции'] = pd.to_datetime(transactions['Дата операции'], dayfirst=True, errors='coerce')
 
     # Вычисляем дату 3 месяца назад
     start_date = date - timedelta(days=90)
@@ -57,20 +57,25 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
     # Возвращаем сумму трат по категории
     total_spending = filtered_transactions['Сумма операции'].sum()
 
-    transactions = transactions.melt(id_vars=['Дата операции'])
+    # Создаём копию отфильтрованных данных
+    filtered_transactions = filtered_transactions.copy()
+
+    # Преобразуем 'Дата операции' в строку для JSON
+    filtered_transactions['Дата операции'] = filtered_transactions['Дата операции'].astype(str)
 
     return {
         'category': category,
         'total_spending': total_spending,
-        'transactions': filtered_transactions[['Дата операции', 'Сумма операции', 'Описание']].to_dict(orient='records')
+        'transactions': filtered_transactions[
+            ['Дата операции', 'Сумма операции', 'Описание']
+        ].to_dict(orient='records')
     }
 
-
 # Пример использования
-if __name__ == "__main__":
-    # Загружаем данные из Excel файла
-    df = pd.read_excel(r'C:\Users\artem\PycharmProjects\Coursework\data\operations.xlsx')
-
-    # Пример вызова функции с категорией и датой
-    result = spending_by_category(transactions=df, category="Супермаркеты", date="2020-05-20")
-    print(result)
+# if __name__ == "__main__":
+#     # Загружаем данные из Excel файла
+#     df = pd.read_excel(os.path.join(os.path.dirname(__file__), "..", "data", "operations.xlsx"))
+#
+#     # Пример вызова функции с категорией и датой
+#     result = spending_by_category(transactions=df, category="Супермаркеты", date="2020-05-20")
+#     print(result)

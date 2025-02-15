@@ -1,76 +1,58 @@
 import json
-from datetime import datetime, timedelta
-from utils import load_user_settings, get_currency_rates, get_stock_prices, load_transactions_from_excel, \
-    filter_transactions_by_date, get_top_transactions
+from datetime import datetime
+
+from src.utils import (
+    get_cards,
+    get_currency_rates,
+    get_data_frame_from_excel_file,
+    get_stock_prices,
+    get_top_transactions,
+    greet,
+)
 
 
-# Основная функция для страницы "Главная"
-def get_event_data(date_str: str, period: str = 'M') -> str:
-    # Преобразуем строку даты в datetime
-    date = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+def generate_json_response(date_time_str: str, path_to_excel_file: str, path_to_user_settings_json: str) -> str:
+    """
+    Главная функция, принимающая на вход строку с датой и временем и возвращающая JSON-ответ с данными.
 
-    # Получаем начальную дату для анализа
-    start_date = get_start_date(date, period)
+    :param date_time_str: Строка с датой и временем в формате "YYYY-MM-DD HH:MM:SS"
+    :param path_to_excel_file: Путь к файлу Excel с данными транзакций
+    :param path_to_user_settings_json: Путь к JSON файлу с настройками пользователя
+    :return: JSON строка с нужными данными
+    """
 
-    # Загружаем настройки пользователя
-    user_settings = load_user_settings()
+    # Преобразуем строку с датой и временем в объект datetime
+    try:
+        date_time_obj = datetime.strptime(date_time_str, "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        raise ValueError("Неверный формат даты и времени. Ожидается формат YYYY-MM-DD HH:MM:SS")
 
-    # Загружаем данные о транзакциях
-    transactions_df = load_transactions_from_excel(r'C:\Users\artem\PycharmProjects\Coursework\data\operations.xlsx')
+    # Получаем приветствие
+    greeting = greet()
 
-    # Фильтруем транзакции по дате
-    filtered_transactions = filter_transactions_by_date(transactions_df, start_date, date)
+    # Загружаем данные из Excel файла
+    transactions = get_data_frame_from_excel_file(path_to_excel_file)
+
+    # Получаем информацию по картам
+    cards = get_cards(transactions)
 
     # Получаем топ-5 транзакций
-    top_transactions = get_top_transactions(filtered_transactions)
+    top_transactions = get_top_transactions(transactions)
 
-    # Получаем курсы валют и цены на акции
-    currencies = user_settings.get("user_currencies", [])
-    stocks = user_settings.get("user_stocks", [])
-    currency_rates = get_currency_rates(currencies)
-    stock_prices = get_stock_prices(stocks)
+    # Получаем курсы валют
+    currency_rates = get_currency_rates(path_to_user_settings_json)
 
-    # Приветствие
-    greeting = get_greeting(date)
+    # Получаем стоимость акций
+    stock_prices = get_stock_prices(path_to_user_settings_json)
 
-    # Формируем JSON-ответ
+    # Формируем результат в формате JSON
     response = {
         "greeting": greeting,
+        "cards": cards,
         "top_transactions": top_transactions,
         "currency_rates": currency_rates,
         "stock_prices": stock_prices
     }
-    response_json = json.dumps(response, ensure_ascii=False, indent=4)
-    return response_json
 
-
-# Функция для получения приветствия в зависимости от времени
-def get_greeting(date: datetime) -> str:
-    hour = date.hour
-    if 6 <= hour < 12:
-        return "Доброе утро"
-    elif 12 <= hour < 18:
-        return "Добрый день"
-    elif 18 <= hour < 22:
-        return "Добрый вечер"
-    else:
-        return "Доброй ночи"
-
-
-# Получение начальной даты для анализа
-def get_start_date(date: datetime, period: str) -> datetime:
-    if period == 'M':
-        return date.replace(day=1)
-    elif period == 'W':
-        start_of_week = date - timedelta(days=date.weekday())
-        return start_of_week
-    elif period == 'Y':
-        return date.replace(month=1, day=1)
-    else:
-        return datetime.min
-
-
-print(get_start_date(datetime.strptime('2021-11-13 10:00:00', "%Y-%m-%d %H:%M:%S"), "M"))
-print(get_greeting(datetime.strptime('2021-11-13 10:00:00', "%Y-%m-%d %H:%M:%S")))
-print(get_event_data("2023-11-11 00:00:00", "M"))
-
+    # Преобразуем ответ в строку JSON и возвращаем
+    return json.dumps(response, ensure_ascii=False, indent=2)
